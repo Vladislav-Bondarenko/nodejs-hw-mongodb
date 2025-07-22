@@ -15,8 +15,10 @@ async function getAllContactsControllerInternal(req, res) {
   const sortOrder = req.query.sortOrder || 'asc';
   const type = req.query.type;
   const isFavourite = req.query.isFavourite;
+  const userId = req.user._id;
 
   const result = await getAllContacts({
+    userId,
     page,
     perPage,
     sortBy,
@@ -34,8 +36,9 @@ async function getAllContactsControllerInternal(req, res) {
 
 async function getContactByIdControllerInternal(req, res) {
   const { contactId } = req.params;
+  const userId = req.user._id;
 
-  const contact = await getContactById(contactId);
+  const contact = await getContactById(contactId, userId);
 
   if (!contact) {
     throw createError(404, 'Contact not found');
@@ -50,6 +53,7 @@ async function getContactByIdControllerInternal(req, res) {
 
 async function createContactControllerInternal(req, res) {
   const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+  const userId = req.user._id;
 
   if (!name || !phoneNumber || !contactType) {
     return res.status(400).json({
@@ -58,13 +62,16 @@ async function createContactControllerInternal(req, res) {
     });
   }
 
-  const newContact = await createContact({
-    name,
-    phoneNumber,
-    email,
-    isFavourite,
-    contactType,
-  });
+  const newContact = await createContact(
+    {
+      name,
+      phoneNumber,
+      email,
+      isFavourite,
+      contactType,
+    },
+    userId,
+  );
 
   res.status(201).json({
     status: 201,
@@ -76,8 +83,9 @@ async function createContactControllerInternal(req, res) {
 async function updateContactControllerInternal(req, res) {
   const { contactId } = req.params;
   const updateData = req.body;
+  const userId = req.user._id;
 
-  const updatedContact = await updateContact(contactId, updateData);
+  const updatedContact = await updateContact(contactId, updateData, userId);
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
@@ -92,8 +100,9 @@ async function updateContactControllerInternal(req, res) {
 
 async function deleteContactControllerInternal(req, res) {
   const { contactId } = req.params;
+  const userId = req.user._id;
 
-  const deleted = await deleteContact(contactId);
+  const deleted = await deleteContact(contactId, userId);
 
   if (!deleted) {
     throw createError(404, 'Contact not found');

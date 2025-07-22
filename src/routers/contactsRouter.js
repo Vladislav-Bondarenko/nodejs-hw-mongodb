@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticate } from '../middlewares/authenticate.js';
 
 import {
   getAllContactsController,
@@ -16,6 +17,8 @@ import {
 } from '../validation/contactsSchemas.js';
 
 const router = express.Router();
+
+router.use(authenticate);
 
 router.get('/', getAllContactsController);
 

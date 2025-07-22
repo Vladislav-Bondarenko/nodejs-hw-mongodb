@@ -41,15 +41,13 @@ export async function getAllContacts({
   };
 }
 
-export async function getContactById(contactId) {
-  const contact = await Contact.findById(contactId);
-  return contact;
+export async function getContactById(contactId, userId) {
+  return Contact.findOne({ _id: contactId, userId });
 }
 
-export async function createContact(data) {
-  const newContact = await Contact.create(data);
-  return newContact;
-}
+export const createContact = async (data, userId) => {
+  return await Contact.create({ ...data, userId });
+};
 
 export async function updateContact(contactId, updateData) {
   const updatedContact = await Contact.findByIdAndUpdate(
