@@ -85,7 +85,7 @@ async function updateContactControllerInternal(req, res) {
   const updateData = req.body;
   const userId = req.user._id;
 
-  const updatedContact = await updateContact(contactId, updateData, userId);
+  const updatedContact = await updateContact(contactId, userId, updateData);
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
