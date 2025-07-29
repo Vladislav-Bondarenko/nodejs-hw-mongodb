@@ -62,6 +62,8 @@ async function createContactControllerInternal(req, res) {
     });
   }
 
+  const { path: photoUrl } = req.file || {};
+
   const newContact = await createContact(
     {
       name,
@@ -69,6 +71,7 @@ async function createContactControllerInternal(req, res) {
       email,
       isFavourite,
       contactType,
+      photo: photoUrl || null,
     },
     userId,
   );
@@ -84,6 +87,11 @@ async function updateContactControllerInternal(req, res) {
   const { contactId } = req.params;
   const updateData = req.body;
   const userId = req.user._id;
+
+  const { path: photoUrl } = req.file || {};
+  if (photoUrl) {
+    updateData.photo = photoUrl;
+  }
 
   const updatedContact = await updateContact(contactId, userId, updateData);
 
