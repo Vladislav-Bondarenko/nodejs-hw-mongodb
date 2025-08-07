@@ -1,0 +1,46 @@
+tags:
+  - contacts
+summary: Update a contact
+operationId: updateContact
+description: Update contact data by ID. Supports multipart form with optional image upload.
+security:
+  - bearerAuth: []
+parameters:
+  - in: path
+    name: contactId
+    required: true
+    schema:
+      type: string
+    description: Contact ID to update
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+          email:
+            type: string
+            format: email
+          phone:
+            type: string
+          favorite:
+            type: boolean
+          photo:
+            type: string
+            format: binary
+responses:
+  '200':
+    description: Contact updated successfully
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Contact.yaml'
+  '404':
+    description: Contact not found
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Error.yaml'

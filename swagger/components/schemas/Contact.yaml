@@ -1,0 +1,16 @@
+type: object
+properties:
+  _id:
+    type: string
+  name:
+    type: string
+  email:
+    type: string
+    format: email
+  phone:
+    type: string
+  favorite:
+    type: boolean
+  photo:
+    type: string
+    format: uri
