@@ -2,33 +2,47 @@ tags:
   - contacts
 summary: Get list of contacts
 operationId: getContacts
-description: Retrieve a paginated list of all user's contacts. Optionally filter by favorite.
+description: Retrieve a paginated, optionally filtered and sorted list of user's contacts.
 security:
   - bearerAuth: []
 parameters:
   - in: query
     name: page
-    schema:
-      type: integer
-      minimum: 1
-    description: Page number for pagination
+    schema: { type: integer, minimum: 1 }
+    description: Page number
   - in: query
-    name: limit
-    schema:
-      type: integer
-      minimum: 1
-    description: Number of contacts per page
+    name: perPage
+    schema: { type: integer, minimum: 1 }
+    description: Items per page
   - in: query
-    name: favorite
+    name: sortBy
+    schema: { type: string }
+    description: Field to sort by (e.g. name, email, phoneNumber, contactType)
+  - in: query
+    name: sortOrder
     schema:
-      type: boolean
-    description: Filter by favorite status
+      type: string
+      enum: [asc, desc]
+    description: Sort direction
+  - in: query
+    name: type
+    schema:
+      type: string
+      enum: [work, home, personal]
+    description: Filter by contact type
+  - in: query
+    name: isFavourite
+    schema: { type: boolean }
+    description: Filter by favourite flag
 responses:
   '200':
-    description: List of contacts
+    description: A paginated list of contacts with metadata
     content:
       application/json:
         schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/Contact'
+          allOf:
+            - $ref: '../../components/schemas/ApiResponse.yaml'
+            - type: object
+              properties:
+                data:
+                  $ref: '../../components/schemas/PaginatedContacts.yaml'

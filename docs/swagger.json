@@ -14,7 +14,7 @@
       "url": "http://localhost:3000"
     },
     {
-      "url": "https://your-deployed-project.onrender.com"
+      "url": "https://contacts-app-szep.onrender.com"
     }
   ],
   "tags": [
@@ -29,7 +29,9 @@
         "tags": [
           "contacts"
         ],
-        "summary": "Get all contacts",
+        "summary": "Get list of contacts",
+        "operationId": "getContacts",
+        "description": "Retrieve a paginated, optionally filtered and sorted list of user's contacts.",
         "security": [
           {
             "bearerAuth": []
@@ -43,29 +45,81 @@
               "type": "integer",
               "minimum": 1
             },
-            "description": "Page number for pagination"
+            "description": "Page number"
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "perPage",
             "schema": {
               "type": "integer",
               "minimum": 1
             },
-            "description": "Number of contacts per page"
+            "description": "Items per page"
           },
           {
             "in": "query",
-            "name": "favorite",
+            "name": "sortBy",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Field to sort by (e.g. name, email, phoneNumber, contactType)"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Sort direction"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "work",
+                "home",
+                "personal"
+              ]
+            },
+            "description": "Filter by contact type"
+          },
+          {
+            "in": "query",
+            "name": "isFavourite",
             "schema": {
               "type": "boolean"
             },
-            "description": "Filter contacts by favorite status"
+            "description": "Filter by favourite flag"
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of contacts"
+            "description": "A paginated list of contacts with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PaginatedContacts"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       },
@@ -74,6 +128,8 @@
           "contacts"
         ],
         "summary": "Create a new contact",
+        "operationId": "createContact",
+        "description": "Add a new contact to the database.",
         "security": [
           {
             "bearerAuth": []
@@ -85,19 +141,32 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name",
+                  "phoneNumber",
+                  "contactType"
+                ],
                 "properties": {
                   "name": {
+                    "type": "string"
+                  },
+                  "phoneNumber": {
                     "type": "string"
                   },
                   "email": {
                     "type": "string",
                     "format": "email"
                   },
-                  "phone": {
-                    "type": "string"
-                  },
-                  "favorite": {
+                  "isFavourite": {
                     "type": "boolean"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ]
                   },
                   "photo": {
                     "type": "string",
@@ -110,7 +179,36 @@
         },
         "responses": {
           "201": {
-            "description": "Contact created successfully"
+            "description": "Contact created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Contact"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -121,6 +219,8 @@
           "contacts"
         ],
         "summary": "Get a contact by ID",
+        "operationId": "getContactById",
+        "description": "Retrieve a single contact by its unique ID.",
         "security": [
           {
             "bearerAuth": []
@@ -134,15 +234,41 @@
             "schema": {
               "type": "string"
             },
-            "description": "The contact ID"
+            "description": "The ID of the contact to retrieve"
           }
         ],
         "responses": {
           "200": {
-            "description": "Contact found"
+            "description": "Contact found successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Contact"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "Contact not found"
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -150,7 +276,9 @@
         "tags": [
           "contacts"
         ],
-        "summary": "Update a contact by ID",
+        "summary": "Update a contact",
+        "operationId": "updateContact",
+        "description": "Update contact data by ID. Supports multipart form with optional image upload.",
         "security": [
           {
             "bearerAuth": []
@@ -164,7 +292,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The contact ID"
+            "description": "Contact ID to update"
           }
         ],
         "requestBody": {
@@ -181,11 +309,19 @@
                     "type": "string",
                     "format": "email"
                   },
-                  "phone": {
+                  "phoneNumber": {
                     "type": "string"
                   },
-                  "favorite": {
+                  "isFavourite": {
                     "type": "boolean"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ]
                   },
                   "photo": {
                     "type": "string",
@@ -198,10 +334,36 @@
         },
         "responses": {
           "200": {
-            "description": "Contact updated"
+            "description": "Contact updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Contact"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "Contact not found"
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -209,7 +371,9 @@
         "tags": [
           "contacts"
         ],
-        "summary": "Delete a contact by ID",
+        "summary": "Delete a contact",
+        "operationId": "deleteContact",
+        "description": "Delete a contact by its ID.",
         "security": [
           {
             "bearerAuth": []
@@ -223,15 +387,40 @@
             "schema": {
               "type": "string"
             },
-            "description": "The contact ID"
+            "description": "ID of the contact to delete"
           }
         ],
         "responses": {
-          "200": {
-            "description": "Contact deleted"
-          },
+          "200": null,
           "404": {
-            "description": "Contact not found"
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "description": "Contact deleted successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "../../../components/schemas/ApiResponse.yaml"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
           }
         }
       }
@@ -242,6 +431,145 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Contact": {
+        "type": "object",
+        "required": [
+          "_id",
+          "name",
+          "phoneNumber",
+          "contactType"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "isFavourite": {
+            "type": "boolean"
+          },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "work",
+              "home",
+              "personal"
+            ]
+          },
+          "photo": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "message",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "OK",
+            "data": null
+          },
+          "description": "Response payload",
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "PaginatedContacts": {
+        "type": "object",
+        "required": [
+          "data",
+          "page",
+          "perPage",
+          "totalItems",
+          "totalPages",
+          "hasPreviousPage",
+          "hasNextPage"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Contact"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "perPage": {
+            "type": "integer",
+            "example": 10
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 37
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 4
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "example": false
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "message",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 404
+          },
+          "message": {
+            "type": "string",
+            "example": "Something went wrong"
+          },
+          "data": {
+            "description": "Additional error details or null",
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Route not found"
+          }
+        }
       }
     }
   }

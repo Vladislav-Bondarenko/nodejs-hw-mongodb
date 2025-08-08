@@ -1,13 +1,16 @@
 type: object
-required: [status, message, data]
+required:
+  - status
+  - message
+  - data
 properties:
   status:
     type: integer
-    example: 400
+    example: 404
   message:
     type: string
-    example: Bad Request
+    example: Something went wrong
   data:
     description: Additional error details or null
     type: [string, 'null']
-    example: Validation failed
+    example: Route not found

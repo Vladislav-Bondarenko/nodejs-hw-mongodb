@@ -11,16 +11,23 @@ requestBody:
     multipart/form-data:
       schema:
         type: object
+        required:
+          - name
+          - phoneNumber
+          - contactType
         properties:
           name:
+            type: string
+          phoneNumber:
             type: string
           email:
             type: string
             format: email
-          phone:
-            type: string
-          favorite:
+          isFavourite:
             type: boolean
+          contactType:
+            type: string
+            enum: [work, home, personal]
           photo:
             type: string
             format: binary
@@ -30,10 +37,15 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/Contact'
+          allOf:
+            - $ref: '../../components/schemas/ApiResponse.yaml'
+            - type: object
+              properties:
+                data:
+                  $ref: '../../components/schemas/Contact.yaml'
   '400':
     description: Bad request
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/Error'
+          $ref: '../../components/schemas/ErrorResponse.yaml'

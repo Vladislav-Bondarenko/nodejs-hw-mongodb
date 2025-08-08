@@ -1,0 +1,12 @@
+type: object
+required: [status, message, data]
+properties:
+  status:
+    type: integer
+    example: 200
+  message:
+    type: string
+    example: OK
+    data:
+  description: Response payload
+  type: [object, array, string, number, boolean, 'null']

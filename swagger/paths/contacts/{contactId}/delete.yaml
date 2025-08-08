@@ -14,10 +14,19 @@ parameters:
     description: ID of the contact to delete
 responses:
   '200':
-    description: Contact deleted successfully
+  description: Contact deleted successfully
+  content:
+    application/json:
+      schema:
+        allOf:
+          - $ref: '../../../components/schemas/ApiResponse.yaml'
+          - type: object
+            properties:
+              data:
+                type: 'null'
   '404':
     description: Contact not found
     content:
       application/json:
         schema:
-          $ref: '../../../components/schemas/Error.yaml'
+          $ref: '../../../components/schemas/ErrorResponse.yaml'
