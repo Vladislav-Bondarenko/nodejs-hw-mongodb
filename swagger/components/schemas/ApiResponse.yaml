@@ -7,6 +7,6 @@ properties:
   message:
     type: string
     example: OK
-    data:
-  description: Response payload
-  type: [object, array, string, number, boolean, 'null']
+  data:
+    description: Response payload
+    type: [object, array, string, number, boolean, 'null']
